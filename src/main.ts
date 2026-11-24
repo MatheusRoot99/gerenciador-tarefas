@@ -2,7 +2,7 @@
 import './style.css';
 
 // ============================================
-// 1. ESTRUTURA HTML DA APLICAÇÃO
+// 1. ESTRUTURA HTML
 // ============================================
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
@@ -12,7 +12,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <p>Organize suas atividades diárias</p>
     </div>
 
-    <div>
+    <div class="form-tarefa">
       <input
         id="inputTarefa"
         type="text"
@@ -22,9 +22,11 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     </div>
 
     <div>
-      <button id="btnTodas">Todas</button>
-      <button id="btnPendentes">Pendentes</button>
-      <button id="btnConcluidas">Concluídas</button>
+      <div class="filtros">
+        <button id="btnTodas">Todas</button>
+        <button id="btnPendentes">Pendentes</button>
+        <button id="btnConcluidas">Concluídas</button>
+      </div>
 
       <ul id="listaTarefas"></ul>
     </div>
@@ -32,17 +34,13 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 `;
 
 // ============================================
-// 2. CAPTURA DOS ELEMENTOS HTML (DOM)
+// 2. ELEMENTOS DO DOM
 // ============================================
-
-// querySelector() procura elementos no HTML.
-// O símbolo # indica uma busca pelo ID.
-// O operador ?. evita acessar métodos de null.
 
 const lista =
   document.querySelector<HTMLUListElement>('#listaTarefas');
 
-const botao =
+const btnAdicionar =
   document.querySelector<HTMLButtonElement>('#btnAdicionar');
 
 const campo =
@@ -58,19 +56,16 @@ const btnConcluidas =
   document.querySelector<HTMLButtonElement>('#btnConcluidas');
 
 // ============================================
-// 3. TIPOS E ESTADO DA APLICAÇÃO
+// 3. TIPOS E ESTADO
 // ============================================
 
-// Interface: define a estrutura de uma tarefa.
 interface Tarefa {
   id: number;
   titulo: string;
   concluida: boolean;
 }
 
-// Fonte única de dados da aplicação.
-// Usamos let porque podemos substituir este array
-// pelo resultado de filter() ou JSON.parse().
+type Filtro = 'todas' | 'pendentes' | 'concluidas';
 
 let tarefas: Tarefa[] = [
   { id: 1, titulo: 'Estudar TypeScript', concluida: false },
@@ -78,247 +73,179 @@ let tarefas: Tarefa[] = [
   { id: 3, titulo: 'Estudar React', concluida: false }
 ];
 
-// Union Type: limita os valores permitidos.
-// O filtro começa mostrando todas as tarefas.
-
-let filtroAtual: 'todas' | 'pendentes' | 'concluidas' = 'todas';
+let filtroAtual: Filtro = 'todas';
 
 // ============================================
-// 4. RECUPERAR TAREFAS DO LOCALSTORAGE
+// 4. RECUPERAR DADOS SALVOS
 // ============================================
-
-// getItem() retorna uma string ou null.
-// Precisamos recuperar os dados ANTES de renderizar.
 
 const dadosSalvos = localStorage.getItem('tarefas');
 
 if (dadosSalvos !== null) {
   try {
-
-    // JSON.parse() transforma texto JSON em dados JS.
     const tarefasConvertidas = JSON.parse(dadosSalvos);
 
-    // Verifica se o conteúdo recuperado é um array.
-    // Futuramente validaremos cada objeto também.
     if (Array.isArray(tarefasConvertidas)) {
-
-      // Substitui os dados iniciais pelos dados salvos.
       tarefas = tarefasConvertidas;
-
     } else {
       console.warn('Os dados salvos não são um array.');
     }
-
   } catch {
-
-    // JSON inválido pode lançar uma exceção.
-    // Neste caso, mantemos as tarefas iniciais.
     console.error('Erro ao recuperar tarefas!');
-
   }
 }
 
 // ============================================
-// 5. FUNÇÃO PARA SALVAR TAREFAS
+// 5. SALVAR TAREFAS
 // ============================================
-
-// Persistência: guardar os dados no navegador.
-// stringify() converte o array em texto JSON.
-// setItem() armazena o texto usando uma chave.
 
 function salvarTarefas() {
   const tarefasJSON = JSON.stringify(tarefas);
-
   localStorage.setItem('tarefas', tarefasJSON);
 }
 
 // ============================================
-// 6. FUNÇÃO PARA RENDERIZAR AS TAREFAS
+// 6. ATUALIZAR APARÊNCIA DOS FILTROS
 // ============================================
 
-// Renderizar = transformar os dados em HTML.
-// O array tarefas continua sendo a fonte dos dados.
+function atualizarBotoesFiltro() {
+  btnTodas?.classList.toggle(
+    'ativo',
+    filtroAtual === 'todas'
+  );
+
+  btnPendentes?.classList.toggle(
+    'ativo',
+    filtroAtual === 'pendentes'
+  );
+
+  btnConcluidas?.classList.toggle(
+    'ativo',
+    filtroAtual === 'concluidas'
+  );
+}
+
+// ============================================
+// 7. RENDERIZAR TAREFAS
+// ============================================
 
 function renderizarTarefas() {
-
-  // Early return: encerra se a lista não existir.
   if (!lista) return;
 
-  // Limpa o HTML antigo para evitar duplicações.
+  // Limpa a lista antes de reconstruí-la.
   lista.innerHTML = '';
 
-  // Começamos com todas as tarefas.
   let tarefasExibidas = tarefas;
 
-  // ========================================
-  // 6.1. APLICAR FILTROS
-  // ========================================
-
-  // filter() cria um novo array.
-  // Não modifica o array original.
-
+  // Aplica o filtro selecionado.
   if (filtroAtual === 'pendentes') {
-
     tarefasExibidas = tarefas.filter((tarefa) => {
       return tarefa.concluida === false;
     });
-
   } else if (filtroAtual === 'concluidas') {
-
     tarefasExibidas = tarefas.filter((tarefa) => {
       return tarefa.concluida === true;
     });
-
   }
 
-  // ========================================
-  // 6.2. CRIAR OS ELEMENTOS HTML
-  // ========================================
-
-  // for...of percorre as tarefas que serão exibidas.
+  // Cria os elementos de cada tarefa.
   for (const tarefa of tarefasExibidas) {
-
-    // Cria um item da lista.
     const item = document.createElement('li');
-
-    // Cria um span para guardar somente o título.
-    // Assim o botão Excluir não ficará riscado.
     const textoTarefa = document.createElement('span');
+    const btnExcluir = document.createElement('button');
 
     textoTarefa.textContent = tarefa.titulo;
 
-    // Aplica a classe CSS se a tarefa está concluída.
     if (tarefa.concluida) {
       textoTarefa.classList.add('concluida');
     }
 
-    // Insere o texto dentro do li.
-    item.appendChild(textoTarefa);
-
-    // ========================================
-    // 6.3. CONCLUIR OU REABRIR TAREFA
-    // ========================================
-
+    // Clicar no cartão conclui ou reabre a tarefa.
     item.addEventListener('click', () => {
-
-      // O operador ! inverte um booleano.
-      // true vira false e false vira true.
       tarefa.concluida = !tarefa.concluida;
 
-      // Primeiro atualizamos os dados.
-      // Depois salvamos e renderizamos.
       salvarTarefas();
       renderizarTarefas();
-
     });
 
-    // ========================================
-    // 6.4. CRIAR BOTÃO EXCLUIR
-    // ========================================
-
-    const btnExcluir = document.createElement('button');
-
+    // Configura o botão de exclusão.
     btnExcluir.textContent = 'Excluir';
 
-    // appendChild() adiciona o elemento filho.
-    // Pai: item (li)
-    // Filho: btnExcluir (button)
-    item.appendChild(btnExcluir);
-
-    // ========================================
-    // 6.5. EXCLUIR TAREFA DO ARRAY
-    // ========================================
-
     btnExcluir.addEventListener('click', (event) => {
-
-      // Impede que o clique chegue ao li.
+      // Evita disparar o clique do cartão.
       event.stopPropagation();
 
-      // Mantém todas as tarefas, menos a clicada.
-      // Comparamos pelo identificador único.
       tarefas = tarefas.filter((tarefaDoArray) => {
         return tarefaDoArray.id !== tarefa.id;
       });
 
-      // Persiste a exclusão.
       salvarTarefas();
-
-      // Atualiza a lista visual.
       renderizarTarefas();
-
     });
 
-    // Insere o li completo dentro da ul.
+    // Monta o cartão.
+    item.appendChild(textoTarefa);
+    item.appendChild(btnExcluir);
+
+    // Adiciona o cartão à lista.
     lista.appendChild(item);
   }
 }
 
 // ============================================
-// 7. EVENTO: ADICIONAR TAREFA
+// 8. EVENTO: ADICIONAR TAREFA
 // ============================================
 
-botao?.addEventListener('click', () => {
-
-  // Verifica se o input existe.
+btnAdicionar?.addEventListener('click', () => {
   if (!campo) return;
 
-  // trim() remove espaços no começo e no final.
   const texto = campo.value.trim();
 
-  // Early return: impede cadastrar texto vazio.
   if (texto === '') {
     console.log('O campo está vazio!');
     return;
   }
 
-  // push() adiciona um objeto ao array.
-  // Date.now() fornece um ID numérico provisório.
   tarefas.push({
     id: Date.now(),
     titulo: texto,
     concluida: false
   });
 
-  // Salva o array atualizado.
   salvarTarefas();
-
-  // Atualiza a interface.
   renderizarTarefas();
 
-  // Limpa o input.
   campo.value = '';
 });
 
 // ============================================
-// 8. EVENTOS DOS BOTÕES DE FILTRO
+// 9. EVENTOS DOS FILTROS
 // ============================================
-
-// Cada botão altera o estado do filtro.
-// Depois renderizamos novamente a lista.
 
 btnTodas?.addEventListener('click', () => {
   filtroAtual = 'todas';
 
+  atualizarBotoesFiltro();
   renderizarTarefas();
 });
 
 btnPendentes?.addEventListener('click', () => {
   filtroAtual = 'pendentes';
 
+  atualizarBotoesFiltro();
   renderizarTarefas();
 });
 
 btnConcluidas?.addEventListener('click', () => {
   filtroAtual = 'concluidas';
 
+  atualizarBotoesFiltro();
   renderizarTarefas();
 });
 
 // ============================================
-// 9. RENDERIZAÇÃO INICIAL
+// 10. INICIALIZAÇÃO
 // ============================================
 
-// O código anterior já recuperou os dados salvos.
-// Agora podemos construir a lista no navegador.
-
 renderizarTarefas();
+atualizarBotoesFiltro();
