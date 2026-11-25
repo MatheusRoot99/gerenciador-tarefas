@@ -27,7 +27,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
         <button id="btnPendentes">Pendentes</button>
         <button id="btnConcluidas">Concluídas</button>
       </div>
-
+      <p id="contadorPendentes"></p>
       <ul id="listaTarefas"></ul>
     </div>
   </section>
@@ -54,6 +54,9 @@ const btnPendentes =
 
 const btnConcluidas =
   document.querySelector<HTMLButtonElement>('#btnConcluidas');
+
+const contadorPendentes =
+  document.querySelector<HTMLParagraphElement>('#contadorPendentes');
 
 // ============================================
 // 3. TIPOS E ESTADO
@@ -126,6 +129,28 @@ function atualizarBotoesFiltro() {
 }
 
 // ============================================
+// nova função
+// ============================================
+
+function atualizarContadorPendentes() {
+
+  // 1. Use tarefas.filter() para selecionar
+  // apenas as tarefas não concluídas.
+  const filtarTarefasPendentes = tarefas.filter((x) => x.concluida === false);
+
+  // 2. Use .length para descobrir a quantidade.
+  const quantidade = filtarTarefasPendentes.length;
+
+  // 3. Mostre a quantidade no console.
+  if (contadorPendentes) {
+    const mensagem = `Você tem ${quantidade} tarefas pendentes`
+    contadorPendentes.textContent = mensagem;
+  };
+}
+
+
+
+// ============================================
 // 7. RENDERIZAR TAREFAS
 // ============================================
 
@@ -134,7 +159,7 @@ function renderizarTarefas() {
 
   // Limpa a lista antes de reconstruí-la.
   lista.innerHTML = '';
-
+  atualizarContadorPendentes();
   let tarefasExibidas = tarefas;
 
   // Aplica o filtro selecionado.
@@ -147,6 +172,13 @@ function renderizarTarefas() {
       return tarefa.concluida === true;
     });
   }
+
+  if (tarefasExibidas.length === 0) {
+    const mensagem = document.createElement('li');
+    mensagem.textContent = 'Nenhuma tarefa encontrada!';
+    mensagem.classList.add('mensagem-vazia');
+    lista.appendChild(mensagem);
+  };
 
   // Cria os elementos de cada tarefa.
   for (const tarefa of tarefasExibidas) {
@@ -195,8 +227,7 @@ function renderizarTarefas() {
 // ============================================
 // 8. EVENTO: ADICIONAR TAREFA
 // ============================================
-
-btnAdicionar?.addEventListener('click', () => {
+function adicionarTarefa() {
   if (!campo) return;
 
   const texto = campo.value.trim();
@@ -216,8 +247,17 @@ btnAdicionar?.addEventListener('click', () => {
   renderizarTarefas();
 
   campo.value = '';
+};
+
+btnAdicionar?.addEventListener('click', () => {
+  adicionarTarefa();
 });
 
+campo?.addEventListener('keydown', (event) => {
+  if (event.key === "Enter") {
+    adicionarTarefa();
+  }
+});
 // ============================================
 // 9. EVENTOS DOS FILTROS
 // ============================================
