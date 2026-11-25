@@ -33,7 +33,7 @@ Pré-requisito: ter o [Node.js](https://nodejs.org/) instalado.
 
 ```bash
 # Clone o repositório
-git clone https://github.com/SEU-USUARIO/gerenciador-tarefas.git
+git clone https://github.com/MatheusRoot99/gerenciador-tarefas.git
 
 # Entre na pasta do projeto
 cd gerenciador-tarefas
