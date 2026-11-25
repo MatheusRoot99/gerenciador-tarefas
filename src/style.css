@@ -37,22 +37,22 @@ p {
 #app {
   width: 1126px;
   max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
   min-height: 100svh;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  text-align: center;
+  border-inline: 1px solid var(--border);
 }
 
 #center {
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 25px;
-  flex-grow: 1;
 }
 
 /* ============================================
@@ -61,8 +61,8 @@ p {
 
 .form-tarefa {
   display: flex;
-  gap: 10px;
   align-items: center;
+  gap: 10px;
 }
 
 .form-tarefa input {
@@ -90,6 +90,7 @@ p {
   background-color: #dbeafe;
 }
 
+/* Filtro selecionado no momento. */
 .filtros button.ativo {
   background-color: #2563eb;
   color: white;
@@ -106,6 +107,7 @@ p {
   max-width: 90vw;
 }
 
+/* Cartão de cada tarefa. */
 #listaTarefas li {
   display: flex;
   justify-content: space-between;
@@ -122,6 +124,7 @@ p {
   background-color: #f1f5f9;
 }
 
+/* Texto da tarefa. */
 #listaTarefas li span {
   flex: 1;
   min-width: 0;
@@ -129,13 +132,33 @@ p {
   text-align: left;
 }
 
+/* Tarefa concluída. */
+.concluida {
+  text-decoration: line-through;
+  color: #888;
+}
+
+/* Grupo de botões (Editar / Excluir). */
+.acoes-tarefa {
+  display: flex;
+  gap: 8px;
+}
+
 #listaTarefas li button {
   flex-shrink: 0;
 }
 
-.concluida {
-  text-decoration: line-through;
+/* Mensagem de lista vazia.
+   Usa #listaTarefas no seletor para vencer as regras dos cartões. */
+#listaTarefas li.mensagem-vazia {
+  justify-content: center;
+  padding: 20px;
   color: #888;
+  cursor: default;
+}
+
+#listaTarefas li.mensagem-vazia:hover {
+  background-color: transparent;
 }
 
 /* ============================================
@@ -158,13 +181,6 @@ p {
   }
 }
 
-.mensagem-vazia {
-  color: #888;
-  text-align: center;
-  padding: 20px;
-  flex-direction: column;
-}
-
 /* ============================================
    7. RESPONSIVIDADE - CELULARES
 ============================================ */
@@ -176,8 +192,8 @@ p {
 
   .form-tarefa {
     flex-direction: column;
-    width: 100%;
     align-items: stretch;
+    width: 100%;
   }
 
   .form-tarefa input {

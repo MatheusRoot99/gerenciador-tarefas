@@ -1,4 +1,3 @@
-
 import './style.css';
 
 // ============================================
@@ -37,29 +36,19 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 // 2. ELEMENTOS DO DOM
 // ============================================
 
-const lista =
-  document.querySelector<HTMLUListElement>('#listaTarefas');
+const lista = document.querySelector<HTMLUListElement>('#listaTarefas');
+const campo = document.querySelector<HTMLInputElement>('#inputTarefa');
+const btnAdicionar = document.querySelector<HTMLButtonElement>('#btnAdicionar');
 
-const btnAdicionar =
-  document.querySelector<HTMLButtonElement>('#btnAdicionar');
-
-const campo =
-  document.querySelector<HTMLInputElement>('#inputTarefa');
-
-const btnTodas =
-  document.querySelector<HTMLButtonElement>('#btnTodas');
-
-const btnPendentes =
-  document.querySelector<HTMLButtonElement>('#btnPendentes');
-
-const btnConcluidas =
-  document.querySelector<HTMLButtonElement>('#btnConcluidas');
+const btnTodas = document.querySelector<HTMLButtonElement>('#btnTodas');
+const btnPendentes = document.querySelector<HTMLButtonElement>('#btnPendentes');
+const btnConcluidas = document.querySelector<HTMLButtonElement>('#btnConcluidas');
 
 const contadorPendentes =
   document.querySelector<HTMLParagraphElement>('#contadorPendentes');
 
 // ============================================
-// 3. TIPOS E ESTADO
+// 3. TIPOS
 // ============================================
 
 interface Tarefa {
@@ -70,163 +59,79 @@ interface Tarefa {
 
 type Filtro = 'todas' | 'pendentes' | 'concluidas';
 
-let tarefas: Tarefa[] = [
+// ============================================
+// 4. PERSISTÊNCIA (localStorage)
+// ============================================
+
+const CHAVE_STORAGE = 'tarefas';
+
+// Tarefas iniciais, usadas apenas na primeira visita.
+const tarefasIniciais: Tarefa[] = [
   { id: 1, titulo: 'Estudar TypeScript', concluida: false },
   { id: 2, titulo: 'Criar API .NET', concluida: true },
   { id: 3, titulo: 'Estudar React', concluida: false }
 ];
 
-let filtroAtual: Filtro = 'todas';
+// Lê as tarefas salvas. Se não houver nada (ou der erro), usa as iniciais.
+function carregarTarefas(): Tarefa[] {
+  const dadosSalvos = localStorage.getItem(CHAVE_STORAGE);
 
-// ============================================
-// 4. RECUPERAR DADOS SALVOS
-// ============================================
+  if (dadosSalvos === null) return tarefasIniciais;
 
-const dadosSalvos = localStorage.getItem('tarefas');
-
-if (dadosSalvos !== null) {
   try {
     const tarefasConvertidas = JSON.parse(dadosSalvos);
 
     if (Array.isArray(tarefasConvertidas)) {
-      tarefas = tarefasConvertidas;
-    } else {
-      console.warn('Os dados salvos não são um array.');
+      return tarefasConvertidas;
     }
+
+    console.warn('Os dados salvos não são um array.');
   } catch {
     console.error('Erro ao recuperar tarefas!');
   }
+
+  return tarefasIniciais;
 }
 
-// ============================================
-// 5. SALVAR TAREFAS
-// ============================================
-
+// Grava o array atual de tarefas no localStorage.
 function salvarTarefas() {
-  const tarefasJSON = JSON.stringify(tarefas);
-  localStorage.setItem('tarefas', tarefasJSON);
+  localStorage.setItem(CHAVE_STORAGE, JSON.stringify(tarefas));
 }
 
 // ============================================
-// 6. ATUALIZAR APARÊNCIA DOS FILTROS
+// 5. ESTADO DA APLICAÇÃO
 // ============================================
 
-function atualizarBotoesFiltro() {
-  btnTodas?.classList.toggle(
-    'ativo',
-    filtroAtual === 'todas'
-  );
-
-  btnPendentes?.classList.toggle(
-    'ativo',
-    filtroAtual === 'pendentes'
-  );
-
-  btnConcluidas?.classList.toggle(
-    'ativo',
-    filtroAtual === 'concluidas'
-  );
-}
+let tarefas: Tarefa[] = carregarTarefas();
+let filtroAtual: Filtro = 'todas';
 
 // ============================================
-// nova função
+// 6. LÓGICA (sem mexer no DOM)
 // ============================================
 
-function atualizarContadorPendentes() {
-
-  // 1. Use tarefas.filter() para selecionar
-  // apenas as tarefas não concluídas.
-  const filtarTarefasPendentes = tarefas.filter((x) => x.concluida === false);
-
-  // 2. Use .length para descobrir a quantidade.
-  const quantidade = filtarTarefasPendentes.length;
-
-  // 3. Mostre a quantidade no console.
-  if (contadorPendentes) {
-    const mensagem = `Você tem ${quantidade} tarefas pendentes`
-    contadorPendentes.textContent = mensagem;
-  };
-}
-
-
-
-// ============================================
-// 7. RENDERIZAR TAREFAS
-// ============================================
-
-function renderizarTarefas() {
-  if (!lista) return;
-
-  // Limpa a lista antes de reconstruí-la.
-  lista.innerHTML = '';
-  atualizarContadorPendentes();
-  let tarefasExibidas = tarefas;
-
-  // Aplica o filtro selecionado.
+// Retorna só as tarefas que devem aparecer, conforme o filtro.
+function obterTarefasFiltradas(): Tarefa[] {
   if (filtroAtual === 'pendentes') {
-    tarefasExibidas = tarefas.filter((tarefa) => {
-      return tarefa.concluida === false;
-    });
-  } else if (filtroAtual === 'concluidas') {
-    tarefasExibidas = tarefas.filter((tarefa) => {
-      return tarefa.concluida === true;
-    });
+    return tarefas.filter((tarefa) => !tarefa.concluida);
   }
 
-  if (tarefasExibidas.length === 0) {
-    const mensagem = document.createElement('li');
-    mensagem.textContent = 'Nenhuma tarefa encontrada!';
-    mensagem.classList.add('mensagem-vazia');
-    lista.appendChild(mensagem);
-  };
-
-  // Cria os elementos de cada tarefa.
-  for (const tarefa of tarefasExibidas) {
-    const item = document.createElement('li');
-    const textoTarefa = document.createElement('span');
-    const btnExcluir = document.createElement('button');
-
-    textoTarefa.textContent = tarefa.titulo;
-
-    if (tarefa.concluida) {
-      textoTarefa.classList.add('concluida');
-    }
-
-    // Clicar no cartão conclui ou reabre a tarefa.
-    item.addEventListener('click', () => {
-      tarefa.concluida = !tarefa.concluida;
-
-      salvarTarefas();
-      renderizarTarefas();
-    });
-
-    // Configura o botão de exclusão.
-    btnExcluir.textContent = 'Excluir';
-
-    btnExcluir.addEventListener('click', (event) => {
-      // Evita disparar o clique do cartão.
-      event.stopPropagation();
-
-      tarefas = tarefas.filter((tarefaDoArray) => {
-        return tarefaDoArray.id !== tarefa.id;
-      });
-
-      salvarTarefas();
-      renderizarTarefas();
-    });
-
-    // Monta o cartão.
-    item.appendChild(textoTarefa);
-    item.appendChild(btnExcluir);
-
-    // Adiciona o cartão à lista.
-    lista.appendChild(item);
+  if (filtroAtual === 'concluidas') {
+    return tarefas.filter((tarefa) => tarefa.concluida);
   }
+
+  return tarefas;
+}
+
+// Salva e redesenha a tela. Usada após qualquer alteração.
+function atualizarTudo() {
+  salvarTarefas();
+  renderizarTarefas();
 }
 
 // ============================================
-// 8. EVENTO: ADICIONAR TAREFA
+// 7. AÇÕES (alteram o estado)
 // ============================================
+
 function adicionarTarefa() {
   if (!campo) return;
 
@@ -243,45 +148,145 @@ function adicionarTarefa() {
     concluida: false
   });
 
-  salvarTarefas();
-  renderizarTarefas();
-
+  atualizarTudo();
   campo.value = '';
-};
+}
 
-btnAdicionar?.addEventListener('click', () => {
-  adicionarTarefa();
-});
+// Conclui ou reabre uma tarefa.
+function alternarConclusao(tarefa: Tarefa) {
+  tarefa.concluida = !tarefa.concluida;
+  atualizarTudo();
+}
+
+function excluirTarefa(id: number) {
+  tarefas = tarefas.filter((tarefa) => tarefa.id !== id);
+  atualizarTudo();
+}
+
+function editarTarefa(tarefa: Tarefa) {
+  const novoTitulo = prompt('Digite o novo título:', tarefa.titulo);
+
+  // Usuário cancelou o prompt.
+  if (novoTitulo === null) return;
+
+  const tituloLimpo = novoTitulo.trim();
+
+  if (tituloLimpo === '') {
+    console.log('O campo está vazio!');
+    return;
+  }
+
+  tarefa.titulo = tituloLimpo;
+  atualizarTudo();
+}
+
+// ============================================
+// 8. INTERFACE (atualizam o DOM)
+// ============================================
+
+// Destaca o botão do filtro ativo.
+function atualizarBotoesFiltro() {
+  btnTodas?.classList.toggle('ativo', filtroAtual === 'todas');
+  btnPendentes?.classList.toggle('ativo', filtroAtual === 'pendentes');
+  btnConcluidas?.classList.toggle('ativo', filtroAtual === 'concluidas');
+}
+
+// Mostra quantas tarefas ainda estão pendentes.
+function atualizarContadorPendentes() {
+  if (!contadorPendentes) return;
+
+  const quantidade = tarefas.filter((tarefa) => !tarefa.concluida).length;
+  const palavra = quantidade === 1 ? 'tarefa pendente' : 'tarefas pendentes';
+
+  contadorPendentes.textContent = `Você tem ${quantidade} ${palavra}`;
+}
+
+// Cria o <li> de uma tarefa, com texto e botões.
+function criarItemTarefa(tarefa: Tarefa): HTMLLIElement {
+  const item = document.createElement('li');
+  const textoTarefa = document.createElement('span');
+  const btnEditar = document.createElement('button');
+  const btnExcluir = document.createElement('button');
+  const acoesTarefa = document.createElement('div');
+
+  // Texto (riscado se estiver concluída).
+  textoTarefa.textContent = tarefa.titulo;
+  if (tarefa.concluida) {
+    textoTarefa.classList.add('concluida');
+  }
+
+  // Botões agrupados numa div.
+  btnEditar.textContent = 'Editar';
+  btnExcluir.textContent = 'Excluir';
+  acoesTarefa.classList.add('acoes-tarefa');
+  acoesTarefa.appendChild(btnEditar);
+  acoesTarefa.appendChild(btnExcluir);
+
+  // Clicar no cartão conclui ou reabre a tarefa.
+  item.addEventListener('click', () => alternarConclusao(tarefa));
+
+  // stopPropagation evita disparar o clique do cartão.
+  btnEditar.addEventListener('click', (event) => {
+    event.stopPropagation();
+    editarTarefa(tarefa);
+  });
+
+  btnExcluir.addEventListener('click', (event) => {
+    event.stopPropagation();
+    excluirTarefa(tarefa.id);
+  });
+
+  item.appendChild(textoTarefa);
+  item.appendChild(acoesTarefa);
+
+  return item;
+}
+
+// Redesenha a lista inteira.
+function renderizarTarefas() {
+  if (!lista) return;
+
+  lista.innerHTML = '';
+  atualizarContadorPendentes();
+
+  const tarefasExibidas = obterTarefasFiltradas();
+
+  // Lista vazia: mostra uma mensagem.
+  if (tarefasExibidas.length === 0) {
+    const mensagem = document.createElement('li');
+    mensagem.textContent = 'Nenhuma tarefa encontrada!';
+    mensagem.classList.add('mensagem-vazia');
+    lista.appendChild(mensagem);
+    return;
+  }
+
+  for (const tarefa of tarefasExibidas) {
+    lista.appendChild(criarItemTarefa(tarefa));
+  }
+}
+
+// Troca o filtro e atualiza a tela.
+function definirFiltro(filtro: Filtro) {
+  filtroAtual = filtro;
+  atualizarBotoesFiltro();
+  renderizarTarefas();
+}
+
+// ============================================
+// 9. EVENTOS
+// ============================================
+
+btnAdicionar?.addEventListener('click', adicionarTarefa);
 
 campo?.addEventListener('keydown', (event) => {
-  if (event.key === "Enter") {
+  if (event.key === 'Enter') {
     adicionarTarefa();
   }
 });
-// ============================================
-// 9. EVENTOS DOS FILTROS
-// ============================================
 
-btnTodas?.addEventListener('click', () => {
-  filtroAtual = 'todas';
-
-  atualizarBotoesFiltro();
-  renderizarTarefas();
-});
-
-btnPendentes?.addEventListener('click', () => {
-  filtroAtual = 'pendentes';
-
-  atualizarBotoesFiltro();
-  renderizarTarefas();
-});
-
-btnConcluidas?.addEventListener('click', () => {
-  filtroAtual = 'concluidas';
-
-  atualizarBotoesFiltro();
-  renderizarTarefas();
-});
+btnTodas?.addEventListener('click', () => definirFiltro('todas'));
+btnPendentes?.addEventListener('click', () => definirFiltro('pendentes'));
+btnConcluidas?.addEventListener('click', () => definirFiltro('concluidas'));
 
 // ============================================
 // 10. INICIALIZAÇÃO
