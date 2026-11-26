@@ -10,16 +10,22 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <h1>Meu Gerenciador de Tarefas</h1>
       <p>Organize suas atividades diárias</p>
     </div>
-
+    
     <div class="form-tarefa">
-      <input
-        id="inputTarefa"
-        type="text"
-        placeholder="Digite uma tarefa..."
-      />
-      <button id="btnAdicionar">Adicionar tarefa</button>
+      <div class="campo-tarefa">
+        <label for="inputTarefa">Nova tarefa</label>
+        <input
+          id="inputTarefa"
+          type="text"
+          placeholder="Digite uma tarefa..."
+        />
+      </div>
+          <button id="btnAdicionar">Adicionar tarefa</button>
     </div>
 
+    <input id="concluidaTarefa" type="checkbox" hidden/>
+
+    <p id="mensagemFormulario" role="alert"></p>
     <div>
       <div class="filtros">
         <button id="btnTodas">Todas</button>
@@ -46,6 +52,8 @@ const btnConcluidas = document.querySelector<HTMLButtonElement>('#btnConcluidas'
 
 const contadorPendentes =
   document.querySelector<HTMLParagraphElement>('#contadorPendentes');
+const mensagemFormulario =
+  document.querySelector<HTMLParagraphElement>('#mensagemFormulario');
 
 // ============================================
 // 3. TIPOS
@@ -138,7 +146,8 @@ function adicionarTarefa() {
   const texto = campo.value.trim();
 
   if (texto === '') {
-    console.log('O campo está vazio!');
+    if (!mensagemFormulario) return;
+    mensagemFormulario.textContent = 'Digite uma tarefa antes de adicionar!';
     return;
   }
 
@@ -150,6 +159,10 @@ function adicionarTarefa() {
 
   atualizarTudo();
   campo.value = '';
+
+  if (mensagemFormulario) {
+    mensagemFormulario.textContent = '';
+  }
 }
 
 // Conclui ou reabre uma tarefa.
@@ -208,6 +221,11 @@ function criarItemTarefa(tarefa: Tarefa): HTMLLIElement {
   const btnEditar = document.createElement('button');
   const btnExcluir = document.createElement('button');
   const acoesTarefa = document.createElement('div');
+  const checkboxTarefa = document.createElement('input');
+  checkboxTarefa.type = 'checkbox';
+  checkboxTarefa.checked = tarefa.concluida;
+  const rotuloTarefa = document.createElement('label');
+  rotuloTarefa.append(checkboxTarefa, textoTarefa);
 
   // Texto (riscado se estiver concluída).
   textoTarefa.textContent = tarefa.titulo;
@@ -218,12 +236,16 @@ function criarItemTarefa(tarefa: Tarefa): HTMLLIElement {
   // Botões agrupados numa div.
   btnEditar.textContent = 'Editar';
   btnExcluir.textContent = 'Excluir';
+
   acoesTarefa.classList.add('acoes-tarefa');
+  rotuloTarefa.classList.add('rotulo-tarefa');
   acoesTarefa.appendChild(btnEditar);
   acoesTarefa.appendChild(btnExcluir);
 
   // Clicar no cartão conclui ou reabre a tarefa.
-  item.addEventListener('click', () => alternarConclusao(tarefa));
+  checkboxTarefa.addEventListener('change', () => {
+    alternarConclusao(tarefa);
+  });
 
   // stopPropagation evita disparar o clique do cartão.
   btnEditar.addEventListener('click', (event) => {
@@ -236,7 +258,8 @@ function criarItemTarefa(tarefa: Tarefa): HTMLLIElement {
     excluirTarefa(tarefa.id);
   });
 
-  item.appendChild(textoTarefa);
+
+  item.appendChild(rotuloTarefa);
   item.appendChild(acoesTarefa);
 
   return item;
