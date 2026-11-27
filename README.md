@@ -31,6 +31,12 @@ Criei este projeto durante meus estudos de desenvolvimento fullstack para pratic
 
 Pré-requisito: ter o [Node.js](https://nodejs.org/) instalado.
 
+## 🌐 Demonstração
+
+Acesse o Gerenciador de Tarefas online:
+
+[Ver aplicação]([LINK_DA_VERCEL](https://gerenciador-tarefas-phi-lac.vercel.app/))
+
 ```bash
 # Clone o repositório
 git clone https://github.com/MatheusRoot99/gerenciador-tarefas.git
