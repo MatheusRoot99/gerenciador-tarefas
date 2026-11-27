@@ -1,35 +1,49 @@
 # Gerenciador de Tarefas
 
-Aplicação web simples e direta para organizar o dia a dia: você cadastra tarefas, marca o que já foi feito e filtra o que ainda falta.
+Aplicação web para organizar atividades do dia a dia. Permite cadastrar, editar, concluir e excluir tarefas, além de filtrá-las por status. Desenvolvida com **TypeScript, HTML, CSS e Vite** durante meus estudos de desenvolvimento Full Stack.
+
+## Demonstração
+
+**[Acessar o Gerenciador de Tarefas](https://gerenciador-tarefas-phi-lac.vercel.app/)**
+
+Aplicação publicada na Vercel.
 
 ## Sobre o projeto
 
-O Gerenciador de Tarefas é uma aplicação web que permite criar, concluir e excluir tarefas, além de filtrá-las por status (todas, pendentes ou concluídas). A lista já começa com algumas tarefas de exemplo, carregadas a partir de um array, para facilitar o teste da aplicação.
+O Gerenciador de Tarefas é uma aplicação de lista de tarefas que permite acompanhar atividades pendentes e concluídas. Na primeira visita, a lista apresenta algumas tarefas de exemplo para facilitar os testes.
 
-As tarefas são armazenadas no navegador por meio do `localStorage`, com os dados convertidos para o formato JSON. Por isso, ao recarregar a página, tudo continua exatamente como foi deixado.
+As tarefas são armazenadas no **`localStorage`** do navegador em formato JSON. Assim, alterações feitas na lista permanecem após recarregar a página, desde que os dados do navegador não sejam apagados.
 
-Criei este projeto durante meus estudos de desenvolvimento fullstack para praticar lógica de programação, manipulação do DOM, tipagem com TypeScript e persistência de dados no navegador.
+O projeto foi criado para praticar lógica de programação, TypeScript, manipulação do DOM, eventos, validações, responsividade, acessibilidade, Git e GitHub.
 
 ## Funcionalidades
 
-- Adicionar novas tarefas
-- Marcar tarefas como concluídas
-- Excluir tarefas
-- Filtrar por todas, pendentes ou concluídas
-- Manter os dados salvos após recarregar a página
+- Adicionar tarefas pelo botão ou pressionando **Enter**.
+- Editar o título de uma tarefa existente.
+- Marcar e desmarcar tarefas como concluídas por meio de **checkboxes**.
+- Excluir tarefas.
+- Filtrar por **Todas**, **Pendentes** e **Concluídas**.
+- Exibir o contador de tarefas pendentes.
+- Exibir uma mensagem quando o filtro não tiver tarefas.
+- Impedir o cadastro de tarefas vazias ou contendo apenas espaços.
+- Preservar as tarefas após atualizar a página usando `localStorage`.
+- Adaptar a interface para computadores e celulares.
+- Associar rótulos aos campos e checkboxes, permitindo interação por teclado.
 
 ## Tecnologias utilizadas
 
-- **TypeScript**: lógica da aplicação
-- **HTML**: estrutura da interface
-- **CSS**: estilização
-- **Vite**: ambiente de desenvolvimento e build
-- **localStorage**: persistência dos dados no navegador
-- **JSON**: formato usado para serializar as tarefas
+- **TypeScript:** lógica, tipagem e manipulação do DOM.
+- **HTML:** estrutura e elementos semânticos da interface.
+- **CSS:** aparência, Flexbox e responsividade.
+- **Vite:** ambiente de desenvolvimento e build.
+- **localStorage:** persistência local dos dados.
+- **JSON:** serialização e recuperação das tarefas.
+- **Git e GitHub:** versionamento e hospedagem do código.
+- **Vercel:** publicação da aplicação.
 
-## Como executar o projeto
+## Como executar o projeto localmente
 
-Pré-requisito: ter o [Node.js](https://nodejs.org/) instalado.
+**Pré-requisito:** ter o [Node.js](https://nodejs.org/) instalado.
 
 ## 🌐 Demonstração
 
@@ -51,22 +65,49 @@ npm install
 npm run dev
 ```
 
-Depois, abra no navegador o endereço exibido no terminal (normalmente `http://localhost:5173`).
+Abra no navegador o endereço informado pelo terminal (geralmente `http://localhost:5173`).
+
+Para gerar a versão de produção, execute:
+
+```bash
+npm run build
+```
+
+Os arquivos gerados ficarão na pasta `dist`.
+
+## Como usar
+
+1. Digite uma atividade no campo **Nova tarefa** e clique em **Adicionar tarefa** ou pressione **Enter**.
+2. Marque o checkbox para concluir uma tarefa; desmarque para reabri-la.
+3. Use os botões de filtro para visualizar as tarefas por status.
+4. Clique em **Editar** para alterar o título ou em **Excluir** para remover a tarefa.
+5. Atualize a página para conferir que os dados foram mantidos no navegador.
 
 ## Aprendizados
 
-- Organização de código em TypeScript
-- Manipulação de elementos da página com JavaScript
-- Uso de `localStorage` e conversão de dados com JSON
-- Fluxo de trabalho com Git e GitHub
-- Escrita de documentação para outras pessoas entenderem o projeto
+- Organização de funções e tipos em TypeScript.
+- Manipulação de elementos e eventos do DOM.
+- Métodos de arrays, como `filter()`, e atualização da interface a partir do estado.
+- Persistência com `localStorage`, `JSON.stringify()` e `JSON.parse()`.
+- Validação de entradas e apresentação de mensagens ao usuário.
+- Flexbox, media queries e melhorias de acessibilidade.
+- Fluxo de trabalho com Git, GitHub e deploy.
+
+## Limitações atuais
+
+- Os dados ficam armazenados **somente no navegador e dispositivo utilizados**; não existe sincronização entre dispositivos nem banco de dados remoto.
+- A edição do título utiliza a janela `prompt()` do navegador.
+- Ainda não há autenticação ou contas de usuário.
 
 ## Próximos passos
 
-- Editar o texto de uma tarefa existente
-- Melhorar o layout para celulares
-- Adicionar data limite às tarefas
+- Adicionar datas de vencimento e ordenação de tarefas.
+- Melhorar a experiência de edição diretamente na interface.
+- Ampliar as validações e o tratamento de erros.
+- Criar testes automatizados.
 
 ## Autor
 
-Desenvolvido por **Matheus**.
+Desenvolvido por **Matheus** como parte dos estudos em desenvolvimento Full Stack.
+
+[Repositório no GitHub](https://github.com/MatheusRoot99/gerenciador-tarefas)
